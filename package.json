@@ -1,0 +1,66 @@
+{
+    "name": "proto-splitter",
+    "version": "0.0.0",
+    "description": "Split protobuf files into single method files and tree shaking",
+    "main": "index.js",
+    "types": "types/index.d.ts",
+    "typings": "types/index.d.ts",
+    "files": [
+        "dist",
+        "types"
+    ],
+    "repository": "git@github.com:thundernet8/proto-splitter.git",
+    "author": {
+        "name": "Touchumind",
+        "email": "chinash2010@gmail.com",
+        "url": "https://github.com/thundernet8"
+    },
+    "license": "MIT",
+    "keywords": [
+        "protobuf",
+        "proto",
+        "proto3",
+        "tree-shaking",
+        "proto-packing"
+    ],
+    "scripts": {
+        "build": "rimraf lib && tsc -p tsconfig.json",
+        "prepublishOnly": "npm run build",
+        "release:first": "standard-version --first-release",
+        "release:base": "standard-version --commit-all",
+        "release": "npm run release:base --",
+        "release:pre": "npm run release:base -- --prerelease alpha",
+        "release:patch": "npm run release:base -- --release-as patch",
+        "release:minor": "npm run release:base -- --release-as minor",
+        "release:major": "npm run release:base -- --release-as major",
+        "lint": "tslint --format stylish -p tsconfig.json",
+        "lint:fix": "tslint --format stylish -p tsconfig.json --fix"
+    },
+    "dependencies": {
+        "@grpc/proto-loader": "^0.6.0-pre14",
+        "lodash.camelcase": "^4.3.0",
+        "protobufjs": "^6.10.1"
+    },
+    "devDependencies": {
+        "@types/node": "^14.6.2",
+        "husky": "^3.0.5",
+        "lint-staged": "^6.1.1",
+        "prettier": "^1.19.1",
+        "rimraf": "^3.0.2",
+        "standard-version": "^7.0.0",
+        "ts-node": "^8.6.2",
+        "tslib": "^1.11.1",
+        "typescript": "^3.8.2"
+    },
+    "husky": {
+        "hooks": {
+            "pre-commit": "lint-staged"
+        }
+    },
+    "lint-staged": {
+        "*.{ts}": [
+            "yarn lint:fix",
+            "git add"
+        ]
+    }
+}

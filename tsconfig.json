@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "commonjs",
+        "lib": ["ES2015", "ES2016", "ES2017", "ES2018"],
+        "declaration": true,
+        "declarationDir": "types",
+        "outDir": "./lib",
+        "removeComments": false,
+        "importHelpers": false,
+        "strict": true,
+        "noImplicitAny": false,
+        "strictBindCallApply": true,
+        "noImplicitThis": false,
+        "moduleResolution": "node",
+        "baseUrl": "./src",
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "sourceMap": true,
+        "incremental": false
+    },
+    "include": ["./src/**/*.ts", "./src/**/*.tsx", "./src/*.d.ts"],
+    "exclude": ["**/*.spec.ts?", "**/*.test.ts?", "lib", "test"]
+}
