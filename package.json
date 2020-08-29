@@ -1,6 +1,6 @@
 {
     "name": "proto-splitter",
-    "version": "0.0.0",
+    "version": "0.0.1",
     "description": "Split protobuf files into single method files and tree shaking",
     "main": "index.js",
     "types": "types/index.d.ts",
