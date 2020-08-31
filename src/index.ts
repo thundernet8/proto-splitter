@@ -355,6 +355,7 @@ export async function getProtoRoutes(
     const pb = await loadProtoDef(filePath, {
         includeDirs: [
             path.join(path.dirname(require.resolve('protobufjs')), ''),
+            path.join(path.resolve(__dirname, '../protos')),
         ].concat(options.includeDirs || []),
         keepCase: true,
     });
