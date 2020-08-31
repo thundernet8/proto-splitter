@@ -1,6 +1,8 @@
 import * as Protobuf from 'protobufjs';
 import * as fs from 'fs';
 import * as path from 'path';
+import format from 'clang-format';
+import tmp from 'tmp';
 import {
     createEnumDefinition,
     createMessageDefinition,
@@ -48,14 +50,17 @@ class RoutesSearcher {
 
     private method: string;
 
-    constructor({ pb, pkg, service, method }) {
+    private options: GetProtoRoutesOptions;
+
+    constructor({ pb, pkg, service, method, options }) {
         this.pb = pb;
         this.pkg = pkg;
         this.service = service;
         this.method = method;
+        this.options = options;
     }
 
-    getRoute() {
+    async getRoute() {
         const Service = this.pb[`${this.pkg}.${this.service}`];
         const Method = Service[this.method];
         const { requestType, responseType } = Method;
@@ -75,7 +80,7 @@ class RoutesSearcher {
             errors: this.errors,
             proto: '',
         };
-        route.proto = this.generateRouteProto(route);
+        route.proto = await this.generateRouteProto(route);
         return route;
     }
 
@@ -125,7 +130,7 @@ class RoutesSearcher {
         return msg;
     }
 
-    private generateRouteProto(route: ProtoRoute) {
+    private async generateRouteProto(route: ProtoRoute) {
         const { enums, messages } = route;
         let m = 1;
         enums.forEach((item) => {
@@ -140,8 +145,8 @@ class RoutesSearcher {
             }
         });
         const lines: string[] = [];
-        lines.push(`syntax = "proto3";\n`);
-        lines.push('package mono;\n');
+        lines.push(`syntax = "proto3";`);
+        lines.push('package mono;');
         for (const enumItem of route.enums) {
             if (this.refHistory.get(enumItem.fullName)) {
                 lines.push(this.generateEnumProto(enumItem));
@@ -160,14 +165,49 @@ class RoutesSearcher {
         }
         lines.push(this.generateMsgProto(req));
         lines.push(this.generateMsgProto(resp));
-        lines.push(`service Mono {\n  rpc Call(Req) returns (Resp);\n}`);
-        return lines.join('\n');
+        lines.push(`service Mono{rpc Call(Req) returns (Resp);}`);
+        const proto = lines.join('').trim();
+        if (this.options.format) {
+            return new Promise<string>((resolve, reject) => {
+                tmp.file((err, path, fd, clear) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        fs.writeFile(path, proto, (err) => {
+                            if (err) {
+                                reject(err);
+                            } else {
+                                const stream = format(
+                                    { path },
+                                    'utf-8',
+                                    'google',
+                                    function() {}
+                                );
+                                const bufs: string[] = [];
+                                stream.on('data', function(chunk) {
+                                    bufs.push(chunk);
+                                });
+                                stream.on('end', function() {
+                                    clear();
+                                    resolve(bufs.join(''));
+                                });
+                                stream.on('error', (err) => {
+                                    clear();
+                                    reject(err);
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+        }
+        return proto;
     }
 
     private generateMsgProto(msg) {
         const lines: string[] = [];
         const name = msg.outName || `M${this.idMap.get(msg.fullName)}`;
-        lines.push(`message ${name} {\n`);
+        lines.push(`message ${name}{`);
         // for (const value of msg.type.nestedArray) {
         //     if (value instanceof Protobuf.Enum) {
         //         const enumText = this.generateEnumProto(
@@ -199,41 +239,43 @@ class RoutesSearcher {
         // }
         for (const field of msg.type.fieldsArray) {
             const text = this.generateFieldProto(field);
-            lines.push(`  ${text}`);
+            lines.push(`${text}`);
         }
         for (const part of msg.type.oneofsArray) {
             const { name, fieldsArray } = part;
-            lines.push(`  oneof ${name} {\n`);
+            lines.push(`oneof ${name}{`);
             for (const subField of fieldsArray) {
                 const text = this.generateFieldProto(subField, true);
                 lines.push(`    ${text}`);
             }
-            lines.push(`  }\n`);
+            lines.push(`}`);
         }
         if (msg.type.reserved) {
             for (const field of msg.type.reserved) {
                 if (field[0] === field[1]) {
-                    lines.push(`  reserved ${field[0]};\n`);
+                    lines.push(`reserved ${field[0]};`);
                 } else if (field[1] === 536870911) {
-                    lines.push(`  reserved ${field[0]} to max;\n`);
+                    lines.push(`reserved ${field[0]} to max;`);
                 } else {
-                    lines.push(`  reserved ${field[0]} to ${field[1]};\n`);
+                    lines.push(`reserved ${field[0]} to ${field[1]};`);
                 }
             }
         }
-        lines.push('}\n');
+        lines.push('}');
         return lines.filter((str) => !/^[' ']+$/.test(str)).join('');
     }
 
     private generateEnumProto(enumItem) {
         const lines: string[] = [];
-        lines.push(`enum E${this.idMap.get(enumItem.fullName)} {\n`);
+        lines.push(`message ME${this.idMap.get(enumItem.fullName)}{`);
+        lines.push(`enum E{`);
         for (const key in enumItem.type.values) {
             if (enumItem.type.values.hasOwnProperty(key)) {
-                lines.push(`  ${key} = ${enumItem.type.values[key]};\n`);
+                lines.push(`${key}=${enumItem.type.values[key]};`);
             }
         }
-        lines.push('}\n');
+        lines.push('}');
+        lines.push('}');
         return lines.join('');
     }
 
@@ -272,17 +314,27 @@ class RoutesSearcher {
         } else if (resolvedType instanceof Protobuf.Type) {
             protoType = `M${this.idMap.get(resolvedType.fullName)}`;
         } else if (resolvedType instanceof Protobuf.Enum) {
-            protoType = `E${this.idMap.get(resolvedType.fullName)}`;
+            protoType = `ME${this.idMap.get(resolvedType.fullName)}.E`;
         }
         text.push(protoType);
         text.push(name);
         text.push('=');
-        text.push(`${id};\n`);
-        return text.join(' ');
+        text.push(`${id};`);
+        return text.join();
     }
 }
 
-export async function getProtoRoutes(filePath: string) {
+export interface GetProtoRoutesOptions {
+    /**
+     * 是否格式化proto文件，默认否则proto文件会被压缩
+     */
+    format?: boolean;
+}
+
+export async function getProtoRoutes(
+    filePath: string,
+    options: GetProtoRoutesOptions = {}
+) {
     const content = fs.readFileSync(filePath).toString();
     const match1 = content.match(/[\s]+package[ ]+([a-zA-Z._]+);[\s]+/);
     const match2 = content.match(/[\s]+service[ ]+([a-zA-Z._]+)[\s]+/);
@@ -294,7 +346,6 @@ export async function getProtoRoutes(filePath: string) {
     if (!serviceName) {
         return [];
     }
-    const routes: ProtoRoute[] = [];
     const pb = await loadProtoDef(filePath, {
         includeDirs: [
             path.join(__dirname, './'),
@@ -303,17 +354,17 @@ export async function getProtoRoutes(filePath: string) {
         keepCase: true,
     });
     const Service = pb[`${packageName}.${serviceName}`];
-
+    const tasks: Promise<ProtoRoute>[] = [];
     for (const methodName in Service) {
         const searcher = new RoutesSearcher({
             pb,
             pkg: packageName,
             service: serviceName,
             method: methodName,
+            options,
         });
-        const route = searcher.getRoute();
-        routes.push(route);
+        tasks.push(searcher.getRoute());
     }
 
-    return routes;
+    return Promise.all(tasks);
 }

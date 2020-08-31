@@ -16,5 +16,11 @@ export interface ProtoRoute {
     enums: MessageDefinition<Protobuf.Enum>[];
     errors: string[];
 }
-export declare function getProtoRoutes(filePath: string): Promise<false | ProtoRoute[]>;
+export interface GetProtoRoutesOptions {
+    /**
+     * 是否格式化proto文件，默认否则proto文件会被压缩
+     */
+    format?: boolean;
+}
+export declare function getProtoRoutes(filePath: string, options?: GetProtoRoutesOptions): Promise<false | ProtoRoute[]>;
 export {};

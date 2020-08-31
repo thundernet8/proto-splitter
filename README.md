@@ -15,7 +15,7 @@ import { getProtoRoutes } from 'proto-splitter';
 
 const file = '/your_proto_file_path';
 (async function() {
-    const routes = await getProtoRoutes(file);
+    const routes = await getProtoRoutes(file, { format: true });
     console.log(routes);
 })();
 ```
@@ -69,57 +69,38 @@ service PostService {
 # output two routes
 # 1
 syntax = "proto3";
-
 package mono;
-
-enum E1 {
-  V1 = 0;
-  V2 = 1;
+message ME1 {
+  enum E { V1 = 0; V2 = 1; }
 }
-
-message Req {
-  int32 id = 1;
-}
-
+message Req { int32, id, =, 1; }
 message Resp {
-  string title = 1;
-  int32 id = 2;
-  string content = 3;
-  E1 type = 4;
+  string, title, =, 1;
+  int32, id, =, 2;
+  string, content, =, 3;
+  ME1.E, type, =, 4;
 }
-
-service Mono {
-  rpc Call(Req) returns (Resp);
-}
+service Mono { rpc Call(Req) returns(Resp); }
 
 # 2
 syntax = "proto3";
-
 package mono;
-
-enum E1 {
-  V1 = 0;
-  V2 = 1;
+message ME1 {
+  enum E { V1 = 0; V2 = 1; }
 }
-
 message M1 {
-  string title = 1;
-  int32 id = 2;
-  string content = 3;
-  E1 type = 4;
+  string, title, =, 1;
+  int32, id, =, 2;
+  string, content, =, 3;
+  ME1.E, type, =, 4;
 }
-
 message Req {
-  int32 page_size = 1;
-  int32 page = 2;
+  int32, page_size, =, 1;
+  int32, page, =, 2;
 }
-
 message Resp {
-  repeated M1 post = 1;
-  int32 total = 2;
+  repeated, M1, post, =, 1;
+  int32, total, =, 2;
 }
-
-service Mono {
-  rpc Call(Req) returns (Resp);
-}
+service Mono { rpc Call(Req) returns(Resp); }
 ```

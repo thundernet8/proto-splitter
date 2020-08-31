@@ -38,8 +38,10 @@
     },
     "dependencies": {
         "@grpc/proto-loader": "^0.6.0-pre14",
+        "clang-format": "^1.4.0",
         "lodash.camelcase": "^4.3.0",
-        "protobufjs": "^6.10.1"
+        "protobufjs": "^6.10.1",
+        "tmp": "^0.2.1"
     },
     "devDependencies": {
         "@types/node": "^14.6.2",
