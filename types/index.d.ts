@@ -1,7 +1,6 @@
 import * as Protobuf from 'protobufjs';
 import { Options } from '@grpc/proto-loader';
 interface MessageDefinition<T = Protobuf.Message> {
-    outName?: string;
     fullName: string;
     parent: Protobuf.Message | Protobuf.Namespace;
     namespace: Protobuf.Namespace;

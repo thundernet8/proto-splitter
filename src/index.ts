@@ -12,7 +12,6 @@ import {
 } from './utils';
 
 interface MessageDefinition<T = Protobuf.Message> {
-    outName?: string;
     fullName: string;
     parent: Protobuf.Message | Protobuf.Namespace;
     namespace: Protobuf.Namespace;
@@ -53,6 +52,10 @@ class RoutesSearcher {
 
     private options: GetProtoRoutesOptions;
 
+    private reqFullName!: string;
+
+    private respFullName!: string;
+
     constructor({ pb, pkg, service, method, options }) {
         this.pb = pb;
         this.pkg = pkg;
@@ -65,12 +68,12 @@ class RoutesSearcher {
         const Service = this.pb[`${this.pkg}.${this.service}`];
         const Method = Service[this.method];
         const { requestType, responseType } = Method;
+        this.reqFullName = requestType.fullName;
+        this.respFullName = responseType.fullName;
         this.refHistory.set(requestType.fullName, true);
         this.refHistory.set(responseType.fullName, true);
         this.lookupMessage(requestType);
         this.lookupMessage(responseType);
-        requestType.outName = 'Req';
-        responseType.outName = 'Resp';
         const route: ProtoRoute = {
             path: Method.path,
             pkg: this.pkg,
@@ -135,13 +138,13 @@ class RoutesSearcher {
         const { enums, messages } = route;
         let m = 1;
         enums.forEach((item) => {
-            if (!item.outName && this.refHistory.get(item.fullName)) {
+            if (this.refHistory.get(item.fullName)) {
                 this.idMap.set(item.fullName, m++);
             }
         });
         m = 1;
         messages.forEach((item) => {
-            if (!item.outName && this.refHistory.get(item.fullName)) {
+            if (this.refHistory.get(item.fullName)) {
                 this.idMap.set(item.fullName, m++);
             }
         });
@@ -153,20 +156,16 @@ class RoutesSearcher {
                 lines.push(this.generateEnumProto(enumItem));
             }
         }
-        let req;
-        let resp;
         for (const msg of route.messages) {
-            if (msg.outName === 'Req') {
-                req = msg;
-            } else if (msg.outName === 'Resp') {
-                resp = msg;
-            } else if (this.refHistory.get(msg.fullName)) {
+            if (this.refHistory.get(msg.fullName)) {
                 lines.push(this.generateMsgProto(msg));
             }
         }
-        lines.push(this.generateMsgProto(req));
-        lines.push(this.generateMsgProto(resp));
-        lines.push(`service Mono{rpc Call(Req) returns (Resp);}`);
+        lines.push(
+            `service Mono{rpc Call(M${this.idMap.get(
+                this.reqFullName
+            )}) returns (M${this.idMap.get(this.respFullName)});}`
+        );
         const proto = lines.join('').trim();
         if (this.options.format) {
             return new Promise<string>((resolve, reject) => {
@@ -207,7 +206,7 @@ class RoutesSearcher {
 
     private generateMsgProto(msg) {
         const lines: string[] = [];
-        const name = msg.outName || `M${this.idMap.get(msg.fullName)}`;
+        const name = `M${this.idMap.get(msg.fullName)}`;
         lines.push(`message ${name}{`);
         // for (const value of msg.type.nestedArray) {
         //     if (value instanceof Protobuf.Enum) {
