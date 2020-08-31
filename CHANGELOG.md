@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.4](https://github.com/thundernet8/proto-splitter/compare/v0.0.3...v0.0.4) (2020-08-31)
+
+
+### Bug Fixes
+
+* npm config ([66f4af5](https://github.com/thundernet8/proto-splitter/commit/66f4af587b2aceacb3396e579b1e4f33df81b93a))
+
 ### [0.0.3](https://github.com/thundernet8/proto-splitter/compare/v0.0.2...v0.0.3) (2020-08-31)
 
 
