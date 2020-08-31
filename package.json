@@ -6,7 +6,7 @@
     "types": "types/index.d.ts",
     "typings": "types/index.d.ts",
     "files": [
-        "dist",
+        "lib",
         "types"
     ],
     "repository": "git@github.com:thundernet8/proto-splitter.git",
