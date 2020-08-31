@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import format from 'clang-format';
 import tmp from 'tmp';
+import { Options } from '@grpc/proto-loader';
 import {
     createEnumDefinition,
     createMessageDefinition,
@@ -324,13 +325,18 @@ class RoutesSearcher {
     }
 }
 
-export interface GetProtoRoutesOptions {
+export interface GetProtoRoutesOptions extends Options {
     /**
      * 是否格式化proto文件，默认否则proto文件会被压缩
      */
     format?: boolean;
 }
 
+/**
+ * 从单个proto文件中解析出以单个RPC方法为粒度的proto文件列表
+ * @param filePath proto文件路径
+ * @param options proto文件解析以及输出选项，主要包括includeDirs和format选项
+ */
 export async function getProtoRoutes(
     filePath: string,
     options: GetProtoRoutesOptions = {}
@@ -348,9 +354,8 @@ export async function getProtoRoutes(
     }
     const pb = await loadProtoDef(filePath, {
         includeDirs: [
-            path.join(__dirname, './'),
             path.join(path.dirname(require.resolve('protobufjs')), ''),
-        ],
+        ].concat(options.includeDirs || []),
         keepCase: true,
     });
     const Service = pb[`${packageName}.${serviceName}`];
