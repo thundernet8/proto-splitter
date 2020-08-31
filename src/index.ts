@@ -169,36 +169,42 @@ class RoutesSearcher {
         const proto = lines.join('').trim();
         if (this.options.format) {
             return new Promise<string>((resolve, reject) => {
-                tmp.file((err, path, fd, clear) => {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        fs.writeFile(path, proto, (err) => {
-                            if (err) {
-                                reject(err);
-                            } else {
-                                const stream = format(
-                                    { path },
-                                    'utf-8',
-                                    'google',
-                                    function() {}
-                                );
-                                const bufs: string[] = [];
-                                stream.on('data', function(chunk) {
-                                    bufs.push(chunk);
-                                });
-                                stream.on('end', function() {
-                                    clear();
-                                    resolve(bufs.join(''));
-                                });
-                                stream.on('error', (err) => {
-                                    clear();
+                tmp.file(
+                    {
+                        discardDescriptor: true,
+                        postfix: '.proto',
+                    },
+                    (err, path, fd, clear) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            fs.writeFile(path, proto, (err) => {
+                                if (err) {
                                     reject(err);
-                                });
-                            }
-                        });
+                                } else {
+                                    const stream = format(
+                                        { path },
+                                        'utf-8',
+                                        '{Language: Proto,BasedOnStyle: Google}',
+                                        function() {}
+                                    );
+                                    const bufs: string[] = [];
+                                    stream.on('data', function(chunk) {
+                                        bufs.push(chunk);
+                                    });
+                                    stream.on('end', function() {
+                                        clear();
+                                        resolve(bufs.join(''));
+                                    });
+                                    stream.on('error', (err) => {
+                                        clear();
+                                        reject(err);
+                                    });
+                                }
+                            });
+                        }
                     }
-                });
+                );
             });
         }
         return proto;
@@ -296,7 +302,7 @@ class RoutesSearcher {
         const text: string[] = [];
         // proto3不允许写required，忽略required label
         if (repeated) {
-            text.push('repeated');
+            text.push('repeated ');
         }
 
         let protoType;
@@ -316,11 +322,11 @@ class RoutesSearcher {
         } else if (resolvedType instanceof Protobuf.Enum) {
             protoType = `ME${this.idMap.get(resolvedType.fullName)}.E`;
         }
-        text.push(protoType);
+        text.push(protoType + ' ');
         text.push(name);
         text.push('=');
         text.push(`${id};`);
-        return text.join();
+        return text.join('');
     }
 }
 
