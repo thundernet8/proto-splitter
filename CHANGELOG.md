@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.5](https://github.com/thundernet8/proto-splitter/compare/v0.0.4...v0.0.5) (2020-08-31)
+
+
+### Bug Fixes
+
+* add missing google protos ([dd88eb9](https://github.com/thundernet8/proto-splitter/commit/dd88eb9ce6a8bbcf05dd8f6486f3fcbbff18456d))
+
 ### [0.0.4](https://github.com/thundernet8/proto-splitter/compare/v0.0.3...v0.0.4) (2020-08-31)
 
 
