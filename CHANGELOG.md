@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.0](https://github.com/thundernet8/proto-splitter/compare/v0.0.7...v0.1.0) (2020-09-01)
+
+
+### Bug Fixes
+
+* doc ([def0523](https://github.com/thundernet8/proto-splitter/commit/def0523acd6433868cb0e894598321174ca24c7a))
+
 ### [0.0.8](https://github.com/thundernet8/proto-splitter/compare/v0.0.7...v0.0.8) (2020-09-01)
 
 ### [0.0.7](https://github.com/thundernet8/proto-splitter/compare/v0.0.6...v0.0.7) (2020-08-31)
