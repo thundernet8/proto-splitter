@@ -149,8 +149,12 @@ class RoutesSearcher {
             }
         });
         const lines: string[] = [];
-        lines.push(`syntax = "proto3";`);
-        lines.push('package mono;');
+        if (!this.options.removeSyntax) {
+            lines.push(`syntax = "proto3";`);
+        }
+        if (!this.options.removePkg) {
+            lines.push('package mono;');
+        }
         for (const enumItem of route.enums) {
             if (this.refHistory.get(enumItem.fullName)) {
                 lines.push(this.generateEnumProto(enumItem));
@@ -161,7 +165,9 @@ class RoutesSearcher {
                 lines.push(this.generateMsgProto(msg));
             }
         }
-        lines.push(`service Mono{rpc Call(Req) returns (Resp);}`);
+        if (!this.options.removeService) {
+            lines.push(`service Mono{rpc Call(Req) returns (Resp);}`);
+        }
         const proto = lines.join('').trim();
         if (this.options.format) {
             return new Promise<string>((resolve, reject) => {
@@ -340,6 +346,18 @@ export interface GetProtoRoutesOptions extends Options {
      * 是否格式化proto文件，默认否则proto文件会被压缩
      */
     format?: boolean;
+    /**
+     * 是否移除service定义
+     */
+    removeService?: boolean;
+    /**
+     * 是否移除syntax定义
+     */
+    removeSyntax?: boolean;
+    /**
+     * 是否移除package定义
+     */
+    removePkg?: boolean;
 }
 
 /**
