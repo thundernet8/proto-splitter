@@ -1,4 +1,4 @@
-const { loadRouteFromSource } = require('../lib');
+const { loadRoutePackageDefinitionFromSource } = require('../lib');
 const source = `syntax = "proto3";
 package mono;
 message ME1 {
@@ -20,6 +20,6 @@ service Mono {
   rpc Call(M1) returns (M2);
 }`;
 
-const result = loadRouteFromSource(source);
+const result = loadRoutePackageDefinitionFromSource(source);
 
 console.log(result);
