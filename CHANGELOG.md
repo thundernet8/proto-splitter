@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.2](https://github.com/thundernet8/proto-splitter/compare/v0.1.1...v0.1.2) (2020-09-04)
+
+
+### Features
+
+* format to grpc package defination ([a0e284d](https://github.com/thundernet8/proto-splitter/commit/a0e284dbf28c0535f3f5f32dba54dea9677101b4))
+
 ### [0.1.1](https://github.com/thundernet8/proto-splitter/compare/v0.1.0...v0.1.1) (2020-09-04)
 
 
