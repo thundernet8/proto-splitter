@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.1](https://github.com/thundernet8/proto-splitter/compare/v0.1.0...v0.1.1) (2020-09-04)
+
+
+### Features
+
+* add load route source method ([c747639](https://github.com/thundernet8/proto-splitter/commit/c74763902f3964e6c4db33c2eb02a4bcfd50314c))
+
 ## [0.1.0](https://github.com/thundernet8/proto-splitter/compare/v0.0.7...v0.1.0) (2020-09-01)
 
 
